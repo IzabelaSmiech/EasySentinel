@@ -13,7 +13,7 @@ class sentinel:
         if self._check_path(my_path):
             os.chdir(my_path)
 
-    def _check_path(self, my_path, dir_to_search='GRANULE') -> bool:
+    def _check_path(self, my_path, dir_to_search='GRANULE') -> bool: 
         if my_path[-3:] == 'zip':
         # opening the zip file in READ mode
             with ZipFile(os.path.basename(my_path), 'r') as zip:

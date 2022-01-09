@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 
 #pathlib module - searching if folder granule exists and if it is empty or not
-inp_path =  Path('data\\S2A_MSIL2A_20200804T110631_N0214_R137_T29SQC_20200804T122403.SAFE') 
+inp_path =  Path('C:\\Users\\izka1\\OneDrive\\Pulpit\\geoinformacja\\praca_inzynierska\\data\\S2A_MSIL2A_20200804T110631_N0214_R137_T29SQC_20200804T122403.SAFE') 
 
 def check_dir(inp_path, dir_to_search='GRANULE'):
     return any(
@@ -31,9 +31,10 @@ for root, dirs, files in os.walk(inp_path):
 	for file in files:
 		if (file.endswith(".jp2") & file.startswith("MSK")):
 			myDict["mask"] = file
+    
 
 print(myDict)
-
+x=2
 #get date and time
 def date_time(path) -> str:
     filename = os.path.basename(path)
