@@ -87,3 +87,4 @@ class FastSentinel():
 a = FastSentinel()
 a.create_truecolor(b2,b3,b4)
 a.create_falsecolor(b3, b4, b8)
+
