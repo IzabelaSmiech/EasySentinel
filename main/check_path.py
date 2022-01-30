@@ -18,3 +18,4 @@ for dirname, subdir, filename in os.walk(inp_path):
     if 'GRANULE' in subdir and len(os.listdir(os.path.join(inp_path, 'GRANULE'))) != 0:
         print(os.listdir(os.path.join(inp_path, 'GRANULE')))
         break # to prevent checking more paths
+    

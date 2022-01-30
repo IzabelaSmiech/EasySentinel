@@ -3,7 +3,6 @@ from pathlib import Path
 import os
 from zipfile import ZipFile
 
-
 class sentinel:
     def __init__(self, my_path:str):
         self.my_path = my_path 

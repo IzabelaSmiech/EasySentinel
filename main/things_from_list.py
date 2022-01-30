@@ -3,7 +3,6 @@ from datetime import datetime
 from pathlib import Path
 from pickle import FALSE, TRUE
 
-
 #pathlib module - searching if folder granule exists and if it is empty or not
 inp_path =  Path('C:/Users/izka1/OneDrive/Pulpit/geoinformacja/praca_inzynierska/data/S2A_MSIL2A_20200804T110631_N0214_R137_T29SQC_20200804T122403.SAFE') 
 
