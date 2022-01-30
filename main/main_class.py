@@ -43,7 +43,7 @@ class sentinel:
                         print(os.path.join(root,file))
 
 
-
+#NIE DZIAŁA
 sentinel('data\\S2A_MSIL2A_20200804T110631_N0214_R137_T29SQC_20200804T122403.SAFE').naming_convention()
 sentinel('data\\S2A_MSIL2A_20200804T110631_N0214_R137_T29SQC_20200804T122403.SAFE').get_data()
 sentinel('data\\S2A_MSIL2A_20200804T110631_N0214_R137_T29SQC_20200804T122403.SAFE')._check_path()
