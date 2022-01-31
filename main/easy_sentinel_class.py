@@ -1,12 +1,21 @@
 import rasterio
 import os
 import matplotlib.pyplot as plt
+
 from datetime import datetime
-from bandlength import band_lenght_dict
-from config import datafolder_path, band_path, band_name
+from main_class import MainClass
+from config import datafolder_path
+from dict_band_length import band_lenght_dict
 from raster_loader import b2, b3, b4, b8
 
-class FastSentinel():
+class EasySentinel(MainClass):
+    def __init__(self, datafolder_path):
+        super().__init__(datafolder_path)
+        self.b2 = b2
+        self.b3 = b3
+        self.b4 = b4
+        self.b8 = b8
+
     def __pretty(self,d, indent=0):
         for key, value in d.items():
             print('*' + '\t' * indent + str(key) + ":")
@@ -55,11 +64,11 @@ class FastSentinel():
         namingDict['Product Discriminator'] = fulldate2
         self.__pretty(namingDict)
 
-    def create_truecolor(self, b2, b3, b4):
+    def create_truecolor(self):
         truecolor_file = r'truecolor.tiff'
-        blue = rasterio.open(b2[0], driver='JP2OpenJPEG')
-        green = rasterio.open(b3[0], driver='JP2OpenJPEG')
-        red = rasterio.open(b4[0], driver='JP2OpenJPEG')
+        blue = rasterio.open(self.b2, driver='JP2OpenJPEG')
+        green = rasterio.open(self.b3, driver='JP2OpenJPEG')
+        red = rasterio.open(self.b4, driver='JP2OpenJPEG')
 
         truecolor = rasterio.open(truecolor_file, 'w', driver='Gtiff', width=red.width, height=red.height,
                                     count=3, crs=red.crs, transform=red.transform, dtype=red.dtypes[0])
@@ -69,11 +78,11 @@ class FastSentinel():
         truecolor.write(red.read(1),1) 
         truecolor.close()
 
-    def create_falsecolor(self, b3, b4, b8):
+    def create_falsecolor(self):
         falsecolor_file = r'falsecolor.tiff'
-        blue = rasterio.open(b3[0], driver='JP2OpenJPEG')
-        green = rasterio.open(b4[0], driver='JP2OpenJPEG')
-        red = rasterio.open(b8[0], driver='JP2OpenJPEG')
+        blue = rasterio.open(self.b3, driver='JP2OpenJPEG')
+        green = rasterio.open(self.b4, driver='JP2OpenJPEG')
+        red = rasterio.open(self.b8, driver='JP2OpenJPEG')
 
         falsecolor = rasterio.open(falsecolor_file, 'w', driver='Gtiff', width=blue.width, height=blue.height,
                                     count=3, crs=blue.crs, transform=blue.transform, dtype='uint16')
@@ -84,6 +93,6 @@ class FastSentinel():
         print(red.crs)
         falsecolor.close()
 
-a = FastSentinel()
-a.create_truecolor(b2,b3,b4)
-a.create_falsecolor(b3, b4, b8)
+a = EasySentinel(datafolder_path)
+a.create_truecolor()
+a.create_falsecolor()

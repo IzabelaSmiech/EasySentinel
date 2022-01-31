@@ -1,10 +1,33 @@
-import glob
+import os
 
-from datetime import datetime
-from bandlength import band_lenght_dict
+from dict_band_length import band_lenght_dict
 from config import datafolder_path, band_path
 
-b4 = glob.glob(band_path + '**B04_20m.jp2')
-b8 = glob.glob(band_path + '**B8A_20m.jp2')
-b2 = glob.glob(band_path + '**B02_20m.jp2')
-b3 = glob.glob(band_path + '**B03_20m.jp2')
+list_of_keys = []
+for root, dirs, files in os.walk(datafolder_path):
+	for file in files:
+		if (file.endswith("20m.jp2")):
+			list_of_keys.append(file[-11:-8])
+
+list_of_values = []
+#.jp2 files in directory:
+for root, dirs, files in os.walk(datafolder_path):
+	for file in files:
+		if (file.endswith("20m.jp2")):
+			list_of_values.append(file)
+
+band_dict = dict(zip(list_of_keys, list_of_values))
+
+aot = band_path + band_dict["AOT"]
+b2 = band_path + band_dict["B02"]
+b3 = band_path + band_dict["B03"]
+b4 = band_path + band_dict["B04"]
+b5 = band_path + band_dict["B05"]
+b6 = band_path + band_dict["B06"]
+b7 = band_path + band_dict["B07"]
+b11 = band_path + band_dict["B11"]
+b12 = band_path + band_dict["B12"]
+b8 = band_path + band_dict["B8A"]
+scl = band_path + band_dict["SCL"]
+tci = band_path + band_dict["TCI"]
+wvp = band_path + band_dict["WVP"]
