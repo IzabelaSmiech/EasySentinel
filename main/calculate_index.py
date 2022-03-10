@@ -21,7 +21,7 @@ class CalculateIndex(MainClass):
         self.b11 = b11
         self.b12 = b12
 
-    def ndvi(self, plot = True, colormap = 'YlGn'):
+    def ndvi(self, plot = True, colormap = 'RdYlGn'):
         self.plot = plot
         self.cmap = colormap
         outfile = r'ndvi.tif'
@@ -53,7 +53,7 @@ class CalculateIndex(MainClass):
         with rasterio.open(outfile, 'w', **profile) as dst:
             dst.write(ndvi.astype(rasterio.float32))
 
-    def gndvi(self, plot = True, colormap = 'YlGn'):
+    def gndvi(self, plot = True, colormap = 'RdYlGn'):
         self.plot = plot
         self.cmap = colormap
         outfile = r'gndvi.tif' 
@@ -178,6 +178,38 @@ class CalculateIndex(MainClass):
         with rasterio.open(outfile, 'w', **profile) as dst:
             dst.write(ndwi.astype(rasterio.float32))
 
+    def ndsi(self, plot = True, colormap = 'Blues'):
+        self.plot = plot
+        self.cmap = colormap
+        outfile = r'ndsi.tif'
+
+        with rasterio.open(self.b3, driver='JP2OpenJPEG') as green:
+            GREEN = green.read()
+        with rasterio.open(self.b11, driver='JP2OpenJPEG') as swir:
+            SWIR = swir.read()
+
+        ndsi = (GREEN.astype(float) - SWIR.astype(float)) / (GREEN.astype(float) + SWIR.astype(float))
+        
+        print('\nMin NDSI: {m}'.format(m=np.nanmin(ndsi)))
+        print('Max NDSI: {m}'.format(m=np.nanmax(ndsi)))
+        print('Mean NDSI: {m}'.format(m=np.nanmean(ndsi)))
+        print('Median NDSI: {m}'.format(m=np.nanmedian(ndsi)))
+
+        if self.plot == True:
+            plt.imshow(np.squeeze(ndsi), cmap=self.cmap)
+            plt.title('NDSI')
+            plt.colorbar()
+            plt.show()
+        else:
+            pass 
+
+        profile = green.meta
+        profile.update(driver='GTiff')
+        profile.update(dtype=rasterio.float32)
+
+        with rasterio.open(outfile, 'w', **profile) as dst:
+            dst.write(ndsi.astype(rasterio.float32))
+
     def nbr(self, plot = True, colormap = 'RdYlGn'):
         self.plot = plot
         self.cmap = colormap
@@ -209,6 +241,40 @@ class CalculateIndex(MainClass):
 
         with rasterio.open(outfile, 'w', **profile) as dst:
             dst.write(nbr.astype(rasterio.float32))
+ 
+    def evi2(self, plot = True, colormap = 'RdYlGn'):
+        self.plot = plot
+        self.cmap = colormap
+        outfile = r'evi2.tif'
+
+        with rasterio.open(self.b9, driver='JP2OpenJPEG') as nir:
+            NIR = nir.read()
+        with rasterio.open(self.b5, driver='JP2OpenJPEG') as red:
+            RED = red.read()
+
+
+        evi = 2.4 * ((NIR.astype(float) - RED.astype(float)) / (NIR.astype(float) + RED.astype(float) + 1))
+        
+        print('\nMin EVI2: {m}'.format(m=np.nanmin(evi)))
+        print('Max EVI2: {m}'.format(m=np.nanmax(evi)))
+        print('Mean EVI2: {m}'.format(m=np.nanmean(evi)))
+        print('Median EVI2: {m}'.format(m=np.nanmedian(evi)))
+
+        if self.plot == True:
+            plt.imshow(np.squeeze(evi), cmap=self.cmap)
+            plt.title('EVI2')
+            plt.colorbar()
+            plt.show()
+        else:
+            pass
+
+        profile = nir.meta
+        profile.update(driver='GTiff')
+        profile.update(dtype=rasterio.float32)
+
+        with rasterio.open(outfile, 'w', **profile) as dst:
+            dst.write(evi.astype(rasterio.float32))
 
 z = CalculateIndex(datafolder_path)
-z.ndvi()
+
+z.savi()
