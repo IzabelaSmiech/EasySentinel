@@ -9,12 +9,30 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from datetime import datetime
 from rasterio.windows import Window
-from config import datafolder_path, band_name, band_path
-from dict_band_length import band_lenght_dict
-from main_class import MainClass
-from raster_loader import b1, b2, b3, b4, b5, b6, b7, b8, b9, b11, b12
+from .config import band_name, band_path
+from .dict_band_length import band_lenght_dict
+from .main_class import MainClass
+from .raster_loader import b1, b2, b3, b4, b5, b6, b7, b8, b9, b11, b12
 
 class RasterOperations(MainClass):
+    """
+    Various operations on raster data from Sentinel-2. Inherits from MainClass(). \n
+    ### How to use:
+    from EasySentinel.basics import RasterOperations \n
+    from EasySentinel.config import datafolder_path \n
+    a = RasterOperations(datafolder_path) \n
+    a.data_info() \n
+    ### Methods: \n
+    `data_info()` - providing basic info about the data. Takes one parameter: pretty -> bool. True by default. Prettify parameter styles the returned info. Returns NonType if prettify = True; dict if prettify = False. \n
+    `band_info()` - providing basic info about chosen band. Takes one parameter: pretty -> bool. True by default. Prettify parameter styles the returned info. Returns NonType if prettify = True; dict if prettify = False. \n
+    `create_truecolor()` - returns a true color image in current working dir. Format: TIFF. Parameters: none. \n
+    `create_falsecolor()` -  returns a false color image in current working dir. Format: TIFF. Parameters: none. \n
+    `mask_band()` - returs a masked TIFF image. Takes one parameter: shapefile_path - path to chosen shp, must have the same CRS. \n
+    `crop_band()` - randomly crops chosen band. Takes two parameters: x_size, y_size. \n
+    `band_histogram()` - creates a histogram of band's values. \n
+    `sampling()` - extracts raster values at given points. Returns a list object. 
+    """
+
     def __init__(self, datafolder_path):
         super().__init__(datafolder_path)
         self.b1 = b1
@@ -29,21 +47,30 @@ class RasterOperations(MainClass):
         self.b11 = b11
         self.b12 = b12
 
-    def __pretty(self,d, indent=0):
-        for key, value in d.items():
+    def __prettify(self, o, indent = 0):
+        for key, value in o.items():
             print('*' + '\t' * indent + str(key) + ":")
             if isinstance(value, dict):
-                self.__pretty(value, indent+1)
+                self.__prettify(value, indent+1)
                 print('\t' * indent)
             else:
                 print('\t' * (indent+1) + str(value))
                 print('\t' * indent)
                 print('\t' * indent + '---------')
 
-    def band_info(self):
+    def band_info(self, prettify = True):
+        """Provides basic info about chosen band. Requires providing file name (band_name) in config. 
+
+        Args:
+            prettify (bool, optional): Changes how the info is printed to a prettier display ;). Defaults to True.
+
+        Returns:
+            NonType if prettify = True; dict if prettify = False
+        """
         print("Band statistics and information:")
         self.band = band_name
         self.path = band_path
+        self.pretty = prettify
         my_band = rasterio.open(os.path.join(self.path, self.band), driver='JP2OpenJPEG')
         my_band_stats = rasterio.open(os.path.join(self.path, self.band), driver='JP2OpenJPEG').read()
         self.band_name = self.band.split('_')[2]
@@ -58,9 +85,22 @@ class RasterOperations(MainClass):
             "Band min value": my_band_stats.min(),
             "Band mean value": my_band_stats.mean()
         }
-        self.__pretty(stats_dict)
+        if self.pretty == True:
+            self.__prettify(stats_dict)
+        else: 
+            print(stats_dict)
+            return stats_dict
 
-    def data_info(self):
+    def data_info(self, prettify = True):
+        """Provides basic info about the data. Extracted from file name. 
+
+        Args:
+            prettify (bool, optional): Changes how the info is printed to a prettier display ;). Defaults to True.
+
+        Returns:
+            NonType if prettify = True; dict if prettify = False
+        """
+        self.pretty = prettify
         print('Datapath information:')
         my_path=self.datafolder_path
         filename = os.path.basename(my_path)
@@ -78,9 +118,16 @@ class RasterOperations(MainClass):
         namingDict = dict(zip(keys, values))
         namingDict['Datatake sensing time'] = fulldate
         namingDict['Product Discriminator'] = fulldate2
-        self.__pretty(namingDict)
+
+        if self.pretty == True:
+            self.__prettify(namingDict)
+        else:
+            print(namingDict)
+            return namingDict
 
     def create_truecolor(self):
+        """Returns a true color image in current working dir. Format: TIFF.
+        """
         truecolor_file = r'truecolor.tiff'
         blue = rasterio.open(self.b2, driver='JP2OpenJPEG')
         green = rasterio.open(self.b3, driver='JP2OpenJPEG')
@@ -95,6 +142,8 @@ class RasterOperations(MainClass):
         truecolor.close()
 
     def create_falsecolor(self):
+        """Returns a false color image in current working dir. Format: TIFF.
+        """
         falsecolor_file = r'falsecolor.tiff'
         blue = rasterio.open(self.b3, driver='JP2OpenJPEG')
         green = rasterio.open(self.b4, driver='JP2OpenJPEG')
@@ -108,7 +157,15 @@ class RasterOperations(MainClass):
         falsecolor.write(red.read(1),1) 
         falsecolor.close()
 
-    def mask_band(self, shapefile_path):
+    def mask_band(self, shapefile_path:str):
+        """Returns a masked image in current working dir. Format: TIFF. 
+
+        Args:
+            shapefile_path (str): a path to chosen shapefile. shp must have the same CRS and must overlay a file 
+            user wants to mask. Example: `C:Users/myName/Documents/Folder/mask.shp`
+
+        """
+
         with fiona.open(shapefile_path, "r") as shapefile:
             shapes = [feature["geometry"] for feature in shapefile]
 
@@ -170,7 +227,13 @@ class RasterOperations(MainClass):
         with rasterio.open("masked_file.tif", "w", **out_meta) as dest:
             dest.write(out_image)
 
-    def crop_band(self, x_size, y_size):
+    def crop_band(self, xsize:int, ysize:int):
+        """Randomly crops a selected band to a size user chose with xsize ysize parameters (window size)
+
+        Args:
+            xsize (int): window width 
+            ysize (int): window height
+        """
         print("Which band do you want to crop?")
         band_input = input("b1 | b2 | b3 | b4 | b5 | b6 | b7 | b8 | b9 | b11 | b12: \n")
         
@@ -198,8 +261,6 @@ class RasterOperations(MainClass):
             band_input = self.b12
 
         with rasterio.open(band_input, driver='JP2OpenJPEG') as src:
-            xsize, ysize = x_size,  y_size
-
             xmin, xmax = 0, src.width - xsize
             ymin, ymax = 0, src.height - ysize
             xoff, yoff = random.randint(xmin, xmax), random.randint(ymin, ymax)
@@ -217,6 +278,8 @@ class RasterOperations(MainClass):
                 dst.write(src.read(window=window))
 
     def band_histogram(self):
+        """Plots a histogram of values for selected band. 
+        """
         print("Which bands' histogram do you want to print out?")
         band_input = input("b1 | b2 | b3 | b4 | b5 | b6 | b7 | b8 | b9 | b11 | b12: \n")
         band_title = band_input
@@ -257,8 +320,17 @@ class RasterOperations(MainClass):
         plt.show()
 
     def sampling(self, list_of_coords:list) -> list:
+        """Extracts raster values at given points. 
 
-        print("Which band do you want to crop?")
+        Args:
+            list_of_coords (list): point(s) coordinates. Must be in the same coordinate system as given raster.
+            arg example: `list_of_coords = [(654530,6052193), (702069,5997353), (662635,2137)]`
+
+        Returns:
+            a list object containing raster values in the same order as coords were in `list_of_coords`
+        """
+
+        print("Which band values do you want to sample?")
         band_input = input("b1 | b2 | b3 | b4 | b5 | b6 | b7 | b8 | b9 | b11 | b12: \n")
         
         if band_input == 'b1':
@@ -267,7 +339,8 @@ class RasterOperations(MainClass):
             band_input = self.b2
         elif band_input == 'b3':
             band_input = self.b3
-        elif band_input == 'b4':            band_input = self.b4
+        elif band_input == 'b4':
+            band_input = self.b4
         elif band_input == 'b5':
             band_input = self.b5
         elif band_input == 'b6':
@@ -295,15 +368,4 @@ class RasterOperations(MainClass):
             if polygon.contains(point) == False:
                 print(f"coords {list_of_coords[idx]} are out of raster bounds - {raster.bounds[0:5]}") #or print function
         print(sample)
-
-
-
-a = RasterOperations(datafolder_path)
-#a.data_info()
-#a.band_info()
-#a.create_truecolor()
-#a.create_falsecolor()
-#a.mask_band('C:/Users/izka1/OneDrive/Pulpit/maska/maska.shp')
-#a.crop_band(512, 512)
-#a.band_histogram()
-a.sampling([(654530,6052193), (702069,5997353), (662635,6022760)])
+        return sample 

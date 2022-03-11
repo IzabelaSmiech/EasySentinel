@@ -1,7 +1,7 @@
 import os
 
-from dict_band_length import band_lenght_dict
-from config import datafolder_path, band_path
+from .dict_band_length import band_lenght_dict
+from .config import datafolder_path, band_path
 
 list_of_keys = []
 for root, dirs, files in os.walk(datafolder_path):
