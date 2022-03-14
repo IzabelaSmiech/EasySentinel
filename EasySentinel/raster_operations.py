@@ -18,7 +18,7 @@ class RasterOperations(MainClass):
     """
     Various operations on raster data from Sentinel-2. Inherits from MainClass(). \n
     ### How to use:
-    from EasySentinel.basics import RasterOperations \n
+    from EasySentinel.raster_operations import RasterOperations \n
     from EasySentinel.config import datafolder_path \n
     a = RasterOperations(datafolder_path) \n
     a.data_info() \n
@@ -227,12 +227,8 @@ class RasterOperations(MainClass):
         with rasterio.open("masked_file.tif", "w", **out_meta) as dest:
             dest.write(out_image)
 
-    def crop_band(self, xsize:int, ysize:int):
-        """Randomly crops a selected band to a size user chose with xsize ysize parameters (window size)
-
-        Args:
-            xsize (int): window width 
-            ysize (int): window height
+    def crop_band(self):
+        """Randomly crops a selected band
         """
         print("Which band do you want to crop?")
         band_input = input("b1 | b2 | b3 | b4 | b5 | b6 | b7 | b8 | b9 | b11 | b12: \n")
@@ -261,6 +257,8 @@ class RasterOperations(MainClass):
             band_input = self.b12
 
         with rasterio.open(band_input, driver='JP2OpenJPEG') as src:
+            xsize = 512
+            ysize = 512
             xmin, xmax = 0, src.width - xsize
             ymin, ymax = 0, src.height - ysize
             xoff, yoff = random.randint(xmin, xmax), random.randint(ymin, ymax)

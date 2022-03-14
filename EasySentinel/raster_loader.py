@@ -1,5 +1,4 @@
 import os
-
 from .dict_band_length import band_lenght_dict
 from .config import datafolder_path, band_path
 

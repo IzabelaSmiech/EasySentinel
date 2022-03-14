@@ -1,12 +1,30 @@
-from multiprocessing.spawn import import_main_path
 import rasterio
-from main_class import MainClass
-from raster_loader import b1, b2, b3, b4, b5, b6, b7, b8, b9, b11, b12
-from config import datafolder_path
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
+from .main_class import MainClass
+from .raster_loader import b1, b2, b3, b4, b5, b6, b7, b8, b9, b11, b12
+
 
 class CalculateIndex(MainClass):
+    """
+    Calculating 8 indicies: NDVI, GNDVI, SAVI, NDMI, NDWI, NDSI, NBR, EVI2. Inherits from MainClass(). \n
+    ### How to use:
+    from EasySentinel.calculate_index import CalculateIndex \n
+    from EasySentinel.config import datafolder_path \n
+    a = CalculateIndex(datafolder_path) \n
+    a.ndvi() \n
+    ### Methods: \n
+    All methods have two optional parameters: `plot` for if one wants to plot an image and `colormap` for changing color scheme of the plot.
+    `ndvi()` - calculating NDVI. Returns TIFF image in current working dir. \n
+    `gndvi()` - calculating GNDVI. Returns TIFF image in current working dir. \n
+    `savi()` - calculating SAVI. Returns TIFF image in current working dir. Takes one additional optional argument: `L`. It describes soil brightness correction factor. \n
+    `ndmi()` - calculating NDMI. Returns TIFF image in current working dir. \n
+    `ndwi()` - calculating NDWI. Returns TIFF image in current working dir. \n
+    `ndsi()` - calculating NDSI. Returns TIFF image in current working dir. \n
+    `nbr()` - calculating NBR. Returns TIFF image in current working dir. \n
+    `evi2()` - calculating EVI2. Returns TIFF image in current working dir. 
+
+    """
     def __init__(self, datafolder_path):
         super().__init__(datafolder_path)
         self.b1 = b1
@@ -22,6 +40,14 @@ class CalculateIndex(MainClass):
         self.b12 = b12
 
     def ndvi(self, plot = True, colormap = 'RdYlGn'):
+        """NDVI stands for Normalized Difference Vegetation Index. Often used to analyze vegetation.
+        Values range from -1 to 1. The higher the value, the healthier vegetation. It uses the red and 
+        near-infrared spectral bands.
+
+        Args:
+            plot (bool, optional): Enables plotting an image of calculated index. Defaults to True.
+            colormap (str, optional): A color scheme. Defaults to 'RdYlGn'.
+        """
         self.plot = plot
         self.cmap = colormap
         outfile = r'ndvi.tif'
@@ -54,6 +80,15 @@ class CalculateIndex(MainClass):
             dst.write(ndvi.astype(rasterio.float32))
 
     def gndvi(self, plot = True, colormap = 'RdYlGn'):
+        """GNDVI stands for Green Normalized Difference Vegetation Index. Often used to analyze vegetation.
+        It is a modified version of NDVI. This variant is more sensitive to the chlorophyll content in 
+        the flora. Values range from -1 to 1. The higher the value, the healthier vegetation. It uses the 
+        green and near-infrared spectral bands.
+
+        Args:
+            plot (bool, optional): Enables plotting an image of calculated index. Defaults to True.
+            colormap (str, optional): A color scheme. Defaults to 'RdYlGn'.
+        """
         self.plot = plot
         self.cmap = colormap
         outfile = r'gndvi.tif' 
@@ -84,7 +119,18 @@ class CalculateIndex(MainClass):
         with rasterio.open(outfile, 'w', **profile) as dst:
             dst.write(gndvi.astype(rasterio.float32))
 
-    def savi(self, L = 0.5, plot = True, colormap = 'YlOrBr'):
+    def savi(self, L = 0.5, plot = True, colormap = 'RdYlGn'):
+        """SAVI stands for Soil Adjusted Vegetation Index. Often used to analyze vegetation, soil and agriculture.
+        Enables to correct NDVI for the influence of soil brightness in areas where vegetative cover is low.
+        Values range from -1 to 1. It uses the red, near-infrared spectral bands and soil brightness correction 
+        factor (L) default to 0.5 to accommodate most land cover types.
+
+
+        Args:
+            L (float, optional): soil brightness correction factor. Defaults to 0.5.
+            plot (bool, optional): Enables plotting an image of calculated index. Defaults to True.
+            colormap (str, optional): A color scheme. Defaults to 'RdYlGn'.
+        """
         self.plot = plot
         self.cmap = colormap
         self.l = L
@@ -117,6 +163,15 @@ class CalculateIndex(MainClass):
             dst.write(savi.astype(rasterio.float32))
 
     def ndmi(self, plot = True, colormap = 'RdYlBu'):
+        """NDMI stands for Normalized Difference Moisture Index. Often used to analyze vegetation.
+        It is used to determine vegetation water content. Values range from -1 to 1. 
+        It uses the short-wave infrared and near-infrared spectral bands.
+
+        Args:
+            plot (bool, optional): Enables plotting an image of calculated index. Defaults to True.
+            colormap (str, optional): A color scheme. Defaults to 'RdYlBu'.
+        """
+        
         self.plot = plot
         self.cmap = colormap
         outfile = r'ndmi.tif' 
@@ -148,6 +203,14 @@ class CalculateIndex(MainClass):
             dst.write(ndmi.astype(rasterio.float32))
 
     def ndwi(self, plot = True, colormap = 'Blues'):
+        """NDWI stands for Normalized Difference Water Index. Often used to analyze vegetation and to highlight
+        open water features in a satellite image, allowing a water body to “stand out” against the soil and vegetation.
+        Values range from -1 to 1. It uses the green and near-infrared spectral bands.
+
+        Args:
+            plot (bool, optional): Enables plotting an image of calculated index. Defaults to True.
+            colormap (str, optional): A color scheme. Defaults to 'Blues'.
+        """
         self.plot = plot
         self.cmap = colormap
         outfile = r'ndwi.tif' 
@@ -179,6 +242,15 @@ class CalculateIndex(MainClass):
             dst.write(ndwi.astype(rasterio.float32))
 
     def ndsi(self, plot = True, colormap = 'Blues'):
+        """NDSI stands for Normalized Difference Snow Index. It is commonly used in snow/ice cover mapping application as well 
+        as glacier monitoring. It can difference well snow from clouds. It does not difference snow from water on
+        it's own. Values range from -1 to 1. Values around 1 usually represent snow. It uses the green and short-wave infrared spectral bands.
+
+        Args:
+            plot (bool, optional): Enables plotting an image of calculated index. Defaults to True.
+            colormap (str, optional): A color scheme. Defaults to 'Blues'.
+        """
+        
         self.plot = plot
         self.cmap = colormap
         outfile = r'ndsi.tif'
@@ -211,6 +283,13 @@ class CalculateIndex(MainClass):
             dst.write(ndsi.astype(rasterio.float32))
 
     def nbr(self, plot = True, colormap = 'RdYlGn'):
+        """NBR stands for Normalized Burned Ratio Index. Used to detect burned areas. 
+        Values range from -1 to 1. It uses the short-wave infrared and near-infrared spectral bands.
+
+        Args:
+            plot (bool, optional): Enables plotting an image of calculated index. Defaults to True.
+            colormap (str, optional): A color scheme. Defaults to 'RdYlGn'.
+        """
         self.plot = plot
         self.cmap = colormap
         outfile = r'nbr.tif'
@@ -243,6 +322,15 @@ class CalculateIndex(MainClass):
             dst.write(nbr.astype(rasterio.float32))
  
     def evi2(self, plot = True, colormap = 'RdYlGn'):
+        """EVI2 stands for Enhanced Vegetation Index 2. It is simplified version of the original EVI. 
+        Similar to NDVI, it is also used to monitor vegetation, the higher the value, the healthier the vegetation.
+        As it is not a normalized index, values range is wider than -1 to 1. It is hard to pin point exact 
+        range. It uses the red and near-infrared spectral bands.
+
+        Args:
+            plot (bool, optional): Enables plotting an image of calculated index. Defaults to True.
+            colormap (str, optional): A color scheme. Defaults to 'RdYlGn'.
+        """
         self.plot = plot
         self.cmap = colormap
         outfile = r'evi2.tif'
@@ -274,7 +362,3 @@ class CalculateIndex(MainClass):
 
         with rasterio.open(outfile, 'w', **profile) as dst:
             dst.write(evi.astype(rasterio.float32))
-
-z = CalculateIndex(datafolder_path)
-
-z.savi()
