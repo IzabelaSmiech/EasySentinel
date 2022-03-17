@@ -9,7 +9,6 @@
 * [Introduction](#introduction)
   * [Supported data](#supported-data)
   * [Requirements](#requirements)
-  * [Structure](#structure)
 * [How to use](#how-to-use)
 * [Examples of use](#examples-of-use)
 * [Project status](#project-status)
@@ -33,8 +32,6 @@ Before using this very module, user must already have installed:
 - Fiona version >= 1.8.18
 
 Please note that many libraries have their own dependencies. For example, Rasterio has one and it is GDAL version >= 1.11. 
-
-### Structure
 
 ## How to use
 
