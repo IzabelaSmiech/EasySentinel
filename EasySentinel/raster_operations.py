@@ -1,5 +1,6 @@
 from shapely.geometry.polygon import Polygon
 from shapely.geometry import Point
+from osgeo import gdal
 import os 
 import rasterio
 import numpy as np
@@ -28,7 +29,7 @@ class RasterOperations(MainClass):
     `create_truecolor()` - returns a true color image in current working dir. Format: TIFF. Parameters: none. \n
     `create_falsecolor()` -  returns a false color image in current working dir. Format: TIFF. Parameters: none. \n
     `mask_band()` - returs a masked TIFF image. Takes one parameter: shapefile_path - path to chosen shp, must have the same CRS. \n
-    `crop_band()` - randomly crops chosen band. Takes two parameters: x_size, y_size. \n
+    `crop_band()` - crops a chosen band. Takes four parameters - coordinates\n
     `band_histogram()` - creates a histogram of band's values. \n
     `sampling()` - extracts raster values at given points. Returns a list object. 
     """
@@ -227,9 +228,16 @@ class RasterOperations(MainClass):
         with rasterio.open("masked_file.tif", "w", **out_meta) as dest:
             dest.write(out_image)
 
-    def crop_band(self):
-        """Randomly crops a selected band
+    def crop_band(self, max_x:float, max_y:float, min_x:float, min_y:float):
+        """Crops a selected band to a bbox provided as the arguments.
+
+        Args:
+            max_x (float): maximum x value
+            max_y (float): maximum y value
+            min_x (float): minimum x value
+            min_y (float): minimum y value
         """
+
         print("Which band do you want to crop?")
         band_input = input("b1 | b2 | b3 | b4 | b5 | b6 | b7 | b8 | b9 | b11 | b12: \n")
         
@@ -256,24 +264,9 @@ class RasterOperations(MainClass):
         elif band_input == 'b12':
             band_input = self.b12
 
-        with rasterio.open(band_input, driver='JP2OpenJPEG') as src:
-            xsize = 512
-            ysize = 512
-            xmin, xmax = 0, src.width - xsize
-            ymin, ymax = 0, src.height - ysize
-            xoff, yoff = random.randint(xmin, xmax), random.randint(ymin, ymax)
- 
-            window = Window(xoff, yoff, xsize, ysize)
-            transform = src.window_transform(window)
-
-            profile = src.profile
-            profile.update({
-                'height': xsize,
-                'width': ysize,
-                'transform': transform})
-
-            with rasterio.open('crop_file.tiff', 'w', **profile) as dst:
-                dst.write(src.read(window=window))
+        window = (max_x, max_y, min_x, min_y)
+        open_band = gdal.Open(band_input)
+        gdal.Translate('crop_raster.tif', open_band, projWin = window)
 
     def band_histogram(self):
         """Plots a histogram of values for selected band. 
